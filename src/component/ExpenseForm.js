@@ -1,10 +1,11 @@
 
-import React, { useState } from "react";
-import { Form, FormLabel } from "react-bootstrap";
 
+import React, { useState } from "react";
+import { Button, Form, FormLabel, Table } from "react-bootstrap";
+import ShowExpense from "../pages/ShowExpense";
 const ExpenseForm = () => {
     const [data, setData] = useState([{ money: 0, description: '', category: '' }]);
-    const [expenses, setExpenses] = useState([]);
+ 
 
     const moneyHandler = (event) => {
         setData({ ...data, money: event.target.value });
@@ -18,15 +19,31 @@ const ExpenseForm = () => {
         setData({ ...data, category: event.target.value });
     }
 
-    const expenseSubmit = (event) => {
+    const expenseSubmit = async(event) => {
         event.preventDefault();
-        setExpenses([...expenses, data]);
+        // setExpenses([...expenses, data]);
+        await fetchData(data)
         setData({ money: 0, description: '', category: '' }); // Reset form fields after submission
+      
+        
     }
+   
+   async function fetchData(data){
+    const response = await fetch('https://expensetracker-8e8fb-default-rtdb.firebaseio.com/Expense.json',{
+        method:'POST',
+        body:JSON.stringify(data),
+        headers:({
+            'Content-Type': 'application/json'
+        })
+        
+    })
+    
+    setData({ money: 0, description: '', category: '' });
+   }
 
     return (
-        <div>
-            <Form onSubmit={expenseSubmit}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Form onSubmit={expenseSubmit} style={{padding:'20px' , textAlign:'center'}} className="d-flex flex-row">
                 <Form.Group>
                     <FormLabel>Money:</FormLabel>
                     <input type='number' id='money' value={data.money} onChange={moneyHandler} />
@@ -44,29 +61,12 @@ const ExpenseForm = () => {
                         <option value='shopping'>Shopping</option>
                     </select>
                 </Form.Group>
-                <button type="submit">Submit</button>
+                <Button type="submit" className="mx-5 d-block my-0" >Submit</Button>
             </Form>
+     {<ShowExpense />}
 
-            <div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Money</th>
-                            <th>Description</th>
-                            <th>Category</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {expenses.map((expense, index) => (
-                            <tr key={index}>
-                                <td>{expense.money}</td>
-                                <td>{expense.description}</td>
-                                <td>{expense.category}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+
+
         </div>
     );
 }
